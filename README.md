@@ -41,27 +41,46 @@ Terminal audio streaming with Spotify-like discovery. Search YouTube from your t
 
 ## Requirements
 
-* Python ≥ 3.7
-* `ffplay` available in `$PATH` (install the `ffmpeg` package on your distro)
+* Python ≥ 3.8
+* `ffplay` available in `$PATH` (install the `ffmpeg` package)
+* Internet connection
 
-The package automatically installs Python deps:
+**Install ffmpeg:**
+* **macOS**: `brew install ffmpeg`
+* **Ubuntu/Debian**: `sudo apt install ffmpeg`
+* **CentOS/RHEL**: `sudo yum install ffmpeg`
+* **Windows**: Download from [ffmpeg.org](https://ffmpeg.org/)
+
+The installer automatically handles Python dependencies:
 * `yt-dlp` (YouTube downloading)
 * `readchar` (keyboard input)
 
 ## Installation
 
-### From PyPI (recommended once released)
+### Quick Install (Recommended)
 
 ```bash
-pip install youterm            # system or --user
+# Download and install directly from GitHub
+curl -sSL https://raw.githubusercontent.com/5iri/youterm/main/quick-install.sh | bash
 ```
 
-### From source (development)
+### Manual Installation
 
 ```bash
-git clone https://github.com/youruser/youterm.git
+# Clone the repository
+git clone https://github.com/5iri/youterm.git
 cd youterm
-pip install -e .  # editable install for hacking
+
+# Run the installer (no pip required)
+./install.sh
+```
+
+### Standalone Version
+
+```bash
+# Download single file (no installation needed)
+curl -O https://raw.githubusercontent.com/5iri/youterm/main/youterm-standalone.py
+python3 youterm-standalone.py "your search query"
 ```
 
 ## Usage
@@ -168,13 +187,88 @@ Youterm automatically creates configuration files in `~/.config/youterm/`:
 * `recommendations` – Get queue suggestions
 * `history` – View listening patterns
 
-## Installation
+## Alternative Installation Methods
 
+### From PyPI (when available)
 ```bash
-# Install from source
-git clone https://github.com/youruser/youterm.git
+pip install youterm
+```
+
+### From Source with pip
+```bash
+git clone https://github.com/5iri/youterm.git
 cd youterm
 pip install -e .
+```
+
+## Troubleshooting
+
+### Installation Issues
+
+**Permission denied error:**
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+**ffplay not found:**
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu/Debian
+sudo apt update && sudo apt install ffmpeg
+
+# Check installation
+ffplay -version
+```
+
+**Python version issues:**
+```bash
+# Check Python version
+python3 --version
+
+# If too old, install newer Python
+# Ubuntu: sudo apt install python3.8
+# macOS: brew install python@3.8
+```
+
+**PATH not working after install:**
+```bash
+# Add to your shell profile
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+
+# Or use full path
+$HOME/.local/bin/youterm "test"
+```
+
+### Runtime Issues
+
+**No audio playback:**
+- Check audio output device is working
+- Try: `ffplay -f lavfi -i testsrc2=duration=5:size=320x240:rate=30`
+
+**Search returns no results:**
+- Check internet connection
+- Try different search terms
+- Use quotes for exact phrases
+
+## Uninstallation
+
+### Remove youterm
+```bash
+# If installed with install.sh
+youterm-uninstall
+
+# Manual removal
+rm -rf ~/.local/lib/youterm
+rm -f ~/.local/bin/youterm*
+```
+
+### Remove configuration (optional)
+```bash
+rm -rf ~/.config/youterm
 ```
 
 ## How It Works

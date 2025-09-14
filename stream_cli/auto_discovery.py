@@ -12,8 +12,17 @@ from collections import deque, defaultdict
 from typing import List, Dict, Optional, Set
 import queue as queue_module
 
-from .discovery import music_discovery
-from .smart_queue import smart_queue
+# Handle both direct execution and package imports
+try:
+    from .discovery import music_discovery
+    from .smart_queue import smart_queue
+except ImportError:
+    # Direct execution fallback
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from discovery import music_discovery
+    from smart_queue import smart_queue
 
 
 class BackgroundDiscovery:

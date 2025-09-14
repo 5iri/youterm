@@ -17,6 +17,8 @@ import yt_dlp
 import threading
 from functools import lru_cache
 
+# This import is handled at the end of the file to avoid circular imports
+
 
 class MusicMetadata:
     """Container for extracted music metadata."""
@@ -624,6 +626,16 @@ class MusicDiscovery:
 
 # Global instance for easy importing
 music_discovery = MusicDiscovery()
+
+# Import smart_queue here to avoid circular imports
+try:
+    from .smart_queue import smart_queue
+except ImportError:
+    # Direct execution fallback
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from smart_queue import smart_queue
 
 
 def main():

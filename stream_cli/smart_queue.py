@@ -506,7 +506,14 @@ def main():
     """Main entry point for the queue management CLI tool."""
     import sys
     import argparse
-    from .discovery import music_discovery
+    try:
+        from .discovery import music_discovery
+    except ImportError:
+        # Direct execution fallback
+        import sys
+        import os
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from discovery import music_discovery
 
     parser = argparse.ArgumentParser(description="Queue management tool for youterm")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")

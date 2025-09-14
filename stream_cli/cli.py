@@ -43,9 +43,20 @@ from typing import List, Optional
 
 import readchar
 import yt_dlp
-from .discovery import music_discovery
-from .smart_queue import smart_queue
-from .auto_discovery import auto_discovery
+
+# Handle both direct execution and package imports
+try:
+    from .discovery import music_discovery
+    from .smart_queue import smart_queue
+    from .auto_discovery import auto_discovery
+except ImportError:
+    # Direct execution fallback
+    import sys
+    import os
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from discovery import music_discovery
+    from smart_queue import smart_queue
+    from auto_discovery import auto_discovery
 
 RESULTS_DEFAULT = 20
 RELATED_DEFAULT = 20

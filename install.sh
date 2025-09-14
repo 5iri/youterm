@@ -1,0 +1,233 @@
+#!/bin/bash
+
+# youterm Installer - No pip required
+# Terminal YouTube streaming with Spotify-like discovery
+
+set -e
+
+YOUTERM_VERSION="0.1.0"
+INSTALL_DIR="$HOME/.local/bin"
+LIB_DIR="$HOME/.local/lib/youterm"
+CONFIG_DIR="$HOME/.config/youterm"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+print_status() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+check_requirements() {
+    print_status "Checking requirements..."
+
+    # Check Python
+    if ! command -v python3 &> /dev/null; then
+        print_error "Python 3 is required but not installed"
+        exit 1
+    fi
+
+    # Check Python version
+    python_version=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+    min_version="3.8"
+    if ! python3 -c "import sys; exit(0 if sys.version_info >= (3, 8) else 1)"; then
+        print_error "Python 3.8+ is required, found Python $python_version"
+        exit 1
+    fi
+
+    # Check ffplay
+    if ! command -v ffplay &> /dev/null; then
+        print_warning "ffplay not found. Please install ffmpeg:"
+        echo "  macOS: brew install ffmpeg"
+        echo "  Ubuntu/Debian: sudo apt install ffmpeg"
+        echo "  CentOS/RHEL: sudo yum install ffmpeg"
+        echo ""
+        read -p "Continue anyway? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
+    fi
+
+    print_success "Requirements check passed"
+}
+
+install_dependencies() {
+    print_status "Installing Python dependencies..."
+
+    # Create virtual environment in lib directory
+    python3 -m venv "$LIB_DIR/venv"
+    source "$LIB_DIR/venv/bin/activate"
+
+    # Install dependencies
+    python3 -m pip install --quiet yt-dlp>=2023.9.24 readchar>=4.0.3
+
+    print_success "Dependencies installed"
+}
+
+create_directories() {
+    print_status "Creating directories..."
+
+    mkdir -p "$INSTALL_DIR"
+    mkdir -p "$LIB_DIR"
+    mkdir -p "$CONFIG_DIR"
+
+    print_success "Directories created"
+}
+
+install_youterm() {
+    print_status "Installing youterm..."
+
+    # Copy source files
+    cp -r stream_cli "$LIB_DIR/"
+
+    # Create main executable
+    cat > "$INSTALL_DIR/youterm" << 'EOF'
+#!/bin/bash
+LIB_DIR="$HOME/.local/lib/youterm"
+source "$LIB_DIR/venv/bin/activate"
+cd "$LIB_DIR"
+exec python3 -m stream_cli.cli "$@"
+EOF
+
+    # Create discovery tool
+    cat > "$INSTALL_DIR/youterm-discover" << 'EOF'
+#!/bin/bash
+LIB_DIR="$HOME/.local/lib/youterm"
+source "$LIB_DIR/venv/bin/activate"
+cd "$LIB_DIR"
+exec python3 -m stream_cli.discovery "$@"
+EOF
+
+    # Create queue management tool
+    cat > "$INSTALL_DIR/youterm-queue" << 'EOF'
+#!/bin/bash
+LIB_DIR="$HOME/.local/lib/youterm"
+source "$LIB_DIR/venv/bin/activate"
+cd "$LIB_DIR"
+exec python3 -m stream_cli.smart_queue "$@"
+EOF
+
+    # Make executables
+    chmod +x "$INSTALL_DIR/youterm"
+    chmod +x "$INSTALL_DIR/youterm-discover"
+    chmod +x "$INSTALL_DIR/youterm-queue"
+
+    print_success "youterm installed"
+}
+
+update_path() {
+    print_status "Updating PATH..."
+
+    # Check if ~/.local/bin is in PATH
+    if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
+        # Add to shell profile
+        for shell_profile in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile"; do
+            if [[ -f "$shell_profile" ]]; then
+                if ! grep -q 'export PATH="$HOME/.local/bin:$PATH"' "$shell_profile"; then
+                    echo 'export PATH="$HOME/.local/bin:$PATH"' >> "$shell_profile"
+                    print_success "Added to PATH in $shell_profile"
+                fi
+            fi
+        done
+
+        print_warning "Please run: export PATH=\"\$HOME/.local/bin:\$PATH\""
+        print_warning "Or restart your terminal to use youterm commands"
+    else
+        print_success "PATH already configured"
+    fi
+}
+
+create_uninstaller() {
+    print_status "Creating uninstaller..."
+
+    cat > "$INSTALL_DIR/youterm-uninstall" << EOF
+#!/bin/bash
+echo "Uninstalling youterm..."
+rm -rf "$LIB_DIR"
+rm -f "$INSTALL_DIR/youterm"
+rm -f "$INSTALL_DIR/youterm-discover"
+rm -f "$INSTALL_DIR/youterm-queue"
+rm -f "$INSTALL_DIR/youterm-uninstall"
+echo "youterm uninstalled successfully"
+echo "Configuration files remain in: $CONFIG_DIR"
+echo "To remove config: rm -rf $CONFIG_DIR"
+EOF
+
+    chmod +x "$INSTALL_DIR/youterm-uninstall"
+
+    print_success "Uninstaller created"
+}
+
+show_usage() {
+    print_success "Installation complete!"
+    echo ""
+    echo "Usage:"
+    echo "  youterm                    # Interactive mode"
+    echo "  youterm 'search query'     # Direct search"
+    echo "  youterm-discover 'query'   # Advanced discovery"
+    echo "  youterm-queue status       # Queue management"
+    echo ""
+    echo "Examples:"
+    echo "  youterm 'indie rock'"
+    echo "  youterm 'joe rogan'"
+    echo "  youterm 'vishnu sahasranamam'"
+    echo ""
+    echo "During playback:"
+    echo "  p - pause    r - resume    n - next track"
+    echo "  s - switch music (new search)"
+    echo "  a - more by artist    q - quit"
+    echo ""
+    echo "Configuration: $CONFIG_DIR"
+    echo "Uninstall: youterm-uninstall"
+}
+
+main() {
+    echo "youterm v$YOUTERM_VERSION Installer"
+    echo "Terminal YouTube streaming with Spotify-like discovery"
+    echo "=============================================="
+    echo ""
+
+    # Check if we're in the right directory
+    if [[ ! -d "stream_cli" ]]; then
+        print_error "stream_cli directory not found"
+        print_error "Please run this installer from the youterm source directory"
+        exit 1
+    fi
+
+    check_requirements
+    create_directories
+    install_dependencies
+    install_youterm
+    update_path
+    create_uninstaller
+    show_usage
+
+    echo ""
+    print_success "youterm is ready to use!"
+
+    # Test if PATH is working
+    if command -v youterm &> /dev/null; then
+        print_success "Try: youterm 'your favorite music'"
+    else
+        print_warning "Run: export PATH=\"\$HOME/.local/bin:\$PATH\""
+        print_warning "Then try: youterm 'your favorite music'"
+    fi
+}
+
+main "$@"
