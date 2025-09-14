@@ -26,6 +26,18 @@ if ! command -v ffplay &> /dev/null; then
     exit 1
 fi
 
+# Check if uv is available, install if not
+if ! command -v uv &> /dev/null; then
+    print_info "uv not found. Installing uv..."
+    if command -v curl &> /dev/null; then
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        source $HOME/.cargo/env 2>/dev/null || true
+    else
+        print_error "curl is required to install uv. Please install curl or install uv manually: https://github.com/astral-sh/uv"
+        exit 1
+    fi
+fi
+
 print_info "Installing youterm..."
 
 # Create directories
@@ -44,9 +56,11 @@ fi
 # Copy source
 cp -r "$TEMP_DIR/stream_cli" "$LIB_DIR/"
 
-# Install Python dependencies
-print_info "Installing Python dependencies..."
-python3 -m pip install --user readchar yt-dlp
+# Create temporary virtual environment and install dependencies
+print_info "Installing Python dependencies with uv..."
+TEMP_VENV="$LIB_DIR/.venv"
+uv venv "$TEMP_VENV"
+uv pip install --python "$TEMP_VENV" readchar yt-dlp
 
 # Download yt-dlp as backup
 mkdir -p "$LIB_DIR/bin"
@@ -59,11 +73,51 @@ cat > "$INSTALL_DIR/youterm" << 'EOF'
 LIB_DIR="$HOME/.local/lib/youterm"
 export PATH="$LIB_DIR/bin:$PATH"
 export PYTHONPATH="$LIB_DIR:$PYTHONPATH"
+export VIRTUAL_ENV="$LIB_DIR/.venv"
+export PATH="$LIB_DIR/.venv/bin:$PATH"
 cd "$LIB_DIR"
-exec python3 -m stream_cli.cli "$@"
+exec "$LIB_DIR/.venv/bin/python" -m stream_cli.cli "$@"
 EOF
 
 chmod +x "$INSTALL_DIR/youterm"
+
+# Create additional command wrappers
+cat > "$INSTALL_DIR/youterm-discover" << 'EOF'
+#!/bin/bash
+LIB_DIR="$HOME/.local/lib/youterm"
+export PATH="$LIB_DIR/bin:$PATH"
+export PYTHONPATH="$LIB_DIR:$PYTHONPATH"
+export VIRTUAL_ENV="$LIB_DIR/.venv"
+export PATH="$LIB_DIR/.venv/bin:$PATH"
+cd "$LIB_DIR"
+exec "$LIB_DIR/.venv/bin/python" -m stream_cli.discovery "$@"
+EOF
+
+chmod +x "$INSTALL_DIR/youterm-discover"
+
+cat > "$INSTALL_DIR/youterm-queue" << 'EOF'
+#!/bin/bash
+LIB_DIR="$HOME/.local/lib/youterm"
+export PATH="$LIB_DIR/bin:$PATH"
+export PYTHONPATH="$LIB_DIR:$PYTHONPATH"
+export VIRTUAL_ENV="$LIB_DIR/.venv"
+export PATH="$LIB_DIR/.venv/bin:$PATH"
+cd "$LIB_DIR"
+exec "$LIB_DIR/.venv/bin/python" -m stream_cli.smart_queue "$@"
+EOF
+
+chmod +x "$INSTALL_DIR/youterm-queue"
+
+# Create uninstaller
+cat > "$INSTALL_DIR/youterm-uninstall" << 'EOF'
+#!/bin/bash
+echo "Removing youterm..."
+rm -rf "$HOME/.local/lib/youterm"
+rm -f "$HOME/.local/bin/youterm" "$HOME/.local/bin/youterm-discover" "$HOME/.local/bin/youterm-queue" "$HOME/.local/bin/youterm-uninstall"
+echo "youterm uninstalled successfully!"
+EOF
+
+chmod +x "$INSTALL_DIR/youterm-uninstall"
 
 # Update PATH
 if [[ ":$PATH:" != *":$HOME/.local/bin:"* ]]; then
@@ -75,5 +129,13 @@ fi
 rm -rf "$TEMP_DIR"
 
 print_info "youterm installed successfully!"
-print_info "Run: export PATH=\"\$HOME/.local/bin:\$PATH\""
-print_info "Then: youterm 'your favorite music'"
+print_info ""
+print_info "To start using youterm:"
+print_info "1. Restart your terminal OR run: export PATH=\"\$HOME/.local/bin:\$PATH\""
+print_info "2. Run: youterm 'your favorite music'"
+print_info ""
+print_info "Available commands:"
+print_info "  youterm           - Main streaming interface"
+print_info "  youterm-discover  - Advanced search and discovery"
+print_info "  youterm-queue     - Queue management"
+print_info "  youterm-uninstall - Remove youterm"

@@ -60,14 +60,14 @@ The installer automatically handles Python dependencies:
 
 ### Install (One Command)
 
-### Manual Installation
-
 ```bash
 # Download installer and run locally
 curl -O https://raw.githubusercontent.com/5iri/youterm/main/install.sh
 chmod +x install.sh
 ./install.sh
 ```
+
+The installer automatically handles dependency management using `uv` and creates an isolated environment. It will install `uv` if it's not already available on your system.
 
 ## Usage
 
@@ -179,6 +179,11 @@ Youterm automatically creates configuration files in `~/.config/youterm/`:
 ```bash
 git clone https://github.com/5iri/youterm.git
 cd youterm
+# Use uv for development (recommended)
+uv sync
+uv run youterm
+
+# Or use the installer
 ./install.sh
 ```
 
