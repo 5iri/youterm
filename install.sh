@@ -6,6 +6,8 @@
 set -e
 
 YOUTERM_VERSION="0.2.0"
+REPO="5iri/youterm"
+TAG="v0.2.0"
 INSTALL_DIR="$HOME/.local/bin"
 LIB_DIR="$HOME/.local/lib/youterm"
 CONFIG_DIR="$HOME/.config/youterm"
@@ -75,11 +77,6 @@ install_dependencies() {
     curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" -o "$LIB_DIR/bin/yt-dlp"
     chmod +x "$LIB_DIR/bin/yt-dlp"
 
-    # Download readchar (pure Python, no compilation needed)
-    mkdir -p "$LIB_DIR/lib"
-    curl -L "https://files.pythonhosted.org/packages/0d/36/c3a2e6b2e7f71cee4debc1c13e7d31b58688d5b5b6c5e2dac0f43a48c2d2/readchar-4.0.5-py3-none-any.whl" -o "/tmp/readchar.whl"
-    cd "$LIB_DIR/lib" && python3 -m zipfile -e "/tmp/readchar.whl" . && rm "/tmp/readchar.whl"
-
     print_success "Dependencies installed"
 }
 
@@ -93,18 +90,50 @@ create_directories() {
     print_success "Directories created"
 }
 
-install_youterm() {
-    print_status "Installing youterm..."
+install_source() {
+    print_status "Installing youterm source code..."
 
-    # Copy source files
-    cp -r stream_cli "$LIB_DIR/"
+    # If stream_cli exists locally, use it
+    if [[ -d "stream_cli" ]]; then
+        print_status "Using local source code..."
+        cp -r stream_cli "$LIB_DIR/"
+    else
+        print_status "Downloading source code from GitHub..."
+
+        # Create temp directory
+        mkdir -p "$TEMP_DIR"
+
+        # Download and extract source
+        if command -v curl &> /dev/null; then
+            curl -L "https://github.com/${REPO}/archive/${TAG}.tar.gz" | tar xz -C "$TEMP_DIR" --strip-components=1
+        elif command -v wget &> /dev/null; then
+            wget -O- "https://github.com/${REPO}/archive/${TAG}.tar.gz" | tar xz -C "$TEMP_DIR" --strip-components=1
+        else
+            print_error "curl or wget required to download source code"
+            exit 1
+        fi
+
+        if [[ ! -d "$TEMP_DIR/stream_cli" ]]; then
+            print_error "Failed to download source code"
+            exit 1
+        fi
+
+        # Copy source to install location
+        cp -r "$TEMP_DIR/stream_cli" "$LIB_DIR/"
+    fi
+
+    print_success "Source code installed"
+}
+
+install_youterm() {
+    print_status "Creating executables..."
 
     # Create main executable
     cat > "$INSTALL_DIR/youterm" << 'EOF'
 #!/bin/bash
 LIB_DIR="$HOME/.local/lib/youterm"
 export PATH="$LIB_DIR/bin:$PATH"
-export PYTHONPATH="$LIB_DIR/lib:$PYTHONPATH"
+export PYTHONPATH="$LIB_DIR:$PYTHONPATH"
 cd "$LIB_DIR"
 exec python3 -m stream_cli.cli "$@"
 EOF
@@ -114,7 +143,7 @@ EOF
 #!/bin/bash
 LIB_DIR="$HOME/.local/lib/youterm"
 export PATH="$LIB_DIR/bin:$PATH"
-export PYTHONPATH="$LIB_DIR/lib:$PYTHONPATH"
+export PYTHONPATH="$LIB_DIR:$PYTHONPATH"
 cd "$LIB_DIR"
 exec python3 -m stream_cli.discovery "$@"
 EOF
@@ -124,7 +153,7 @@ EOF
 #!/bin/bash
 LIB_DIR="$HOME/.local/lib/youterm"
 export PATH="$LIB_DIR/bin:$PATH"
-export PYTHONPATH="$LIB_DIR/lib:$PYTHONPATH"
+export PYTHONPATH="$LIB_DIR:$PYTHONPATH"
 cd "$LIB_DIR"
 exec python3 -m stream_cli.smart_queue "$@"
 EOF
@@ -214,6 +243,7 @@ main() {
     check_requirements
     create_directories
     install_dependencies
+    install_source
     install_youterm
     update_path
     create_uninstaller
