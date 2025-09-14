@@ -42,7 +42,14 @@ import time
 from typing import List, Optional
 
 import readchar
-import yt_dlp
+try:
+    import yt_dlp
+except ImportError:
+    # Use wrapper for standalone installation
+    try:
+        from . import ytdlp_wrapper as yt_dlp
+    except ImportError:
+        import ytdlp_wrapper as yt_dlp
 
 # Handle both direct execution and package imports
 try:

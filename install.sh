@@ -68,14 +68,17 @@ check_requirements() {
 }
 
 install_dependencies() {
-    print_status "Installing Python dependencies..."
+    print_status "Installing dependencies..."
 
-    # Create virtual environment in lib directory
-    python3 -m venv "$LIB_DIR/venv"
-    source "$LIB_DIR/venv/bin/activate"
+    # Download yt-dlp executable directly
+    mkdir -p "$LIB_DIR/bin"
+    curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" -o "$LIB_DIR/bin/yt-dlp"
+    chmod +x "$LIB_DIR/bin/yt-dlp"
 
-    # Install dependencies
-    python3 -m pip install --quiet yt-dlp>=2023.9.24 readchar>=4.0.3
+    # Download readchar (pure Python, no compilation needed)
+    mkdir -p "$LIB_DIR/lib"
+    curl -L "https://files.pythonhosted.org/packages/0d/36/c3a2e6b2e7f71cee4debc1c13e7d31b58688d5b5b6c5e2dac0f43a48c2d2/readchar-4.0.5-py3-none-any.whl" -o "/tmp/readchar.whl"
+    cd "$LIB_DIR/lib" && python3 -m zipfile -e "/tmp/readchar.whl" . && rm "/tmp/readchar.whl"
 
     print_success "Dependencies installed"
 }
@@ -100,7 +103,8 @@ install_youterm() {
     cat > "$INSTALL_DIR/youterm" << 'EOF'
 #!/bin/bash
 LIB_DIR="$HOME/.local/lib/youterm"
-source "$LIB_DIR/venv/bin/activate"
+export PATH="$LIB_DIR/bin:$PATH"
+export PYTHONPATH="$LIB_DIR/lib:$PYTHONPATH"
 cd "$LIB_DIR"
 exec python3 -m stream_cli.cli "$@"
 EOF
@@ -109,7 +113,8 @@ EOF
     cat > "$INSTALL_DIR/youterm-discover" << 'EOF'
 #!/bin/bash
 LIB_DIR="$HOME/.local/lib/youterm"
-source "$LIB_DIR/venv/bin/activate"
+export PATH="$LIB_DIR/bin:$PATH"
+export PYTHONPATH="$LIB_DIR/lib:$PYTHONPATH"
 cd "$LIB_DIR"
 exec python3 -m stream_cli.discovery "$@"
 EOF
@@ -118,7 +123,8 @@ EOF
     cat > "$INSTALL_DIR/youterm-queue" << 'EOF'
 #!/bin/bash
 LIB_DIR="$HOME/.local/lib/youterm"
-source "$LIB_DIR/venv/bin/activate"
+export PATH="$LIB_DIR/bin:$PATH"
+export PYTHONPATH="$LIB_DIR/lib:$PYTHONPATH"
 cd "$LIB_DIR"
 exec python3 -m stream_cli.smart_queue "$@"
 EOF

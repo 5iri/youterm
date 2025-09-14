@@ -13,7 +13,11 @@ import random
 import time
 from typing import List, Dict, Set, Optional, Tuple
 from collections import defaultdict
-import yt_dlp
+try:
+    import yt_dlp
+except ImportError:
+    # Use wrapper for standalone installation
+    from . import ytdlp_wrapper as yt_dlp
 import threading
 from functools import lru_cache
 
