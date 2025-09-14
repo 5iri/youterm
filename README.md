@@ -43,6 +43,7 @@ Terminal audio streaming with Spotify-like discovery. Search YouTube from your t
 
 * Python ≥ 3.8
 * `ffplay` available in `$PATH` (install the `ffmpeg` package)
+* `yt-dlp` available in `$PATH` (install the `yt-dlp` package)
 * Internet connection
 
 **Install ffmpeg:**
@@ -58,11 +59,6 @@ The installer automatically handles Python dependencies:
 ## Installation
 
 ### Install (One Command)
-
-```bash
-# Download and run installer directly from GitHub
-curl -sSL https://raw.githubusercontent.com/5iri/youterm/main/install.sh | bash
-```
 
 ### Manual Installation
 

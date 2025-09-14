@@ -3,7 +3,7 @@ set -e
 
 # youterm Simple Installer
 REPO="5iri/youterm"
-TAG="v0.2.0"
+TAG="v0.3.0"
 INSTALL_DIR="$HOME/.local/bin"
 LIB_DIR="$HOME/.local/lib/youterm"
 
@@ -44,7 +44,11 @@ fi
 # Copy source
 cp -r "$TEMP_DIR/stream_cli" "$LIB_DIR/"
 
-# Download yt-dlp
+# Install Python dependencies
+print_info "Installing Python dependencies..."
+python3 -m pip install --user readchar yt-dlp
+
+# Download yt-dlp as backup
 mkdir -p "$LIB_DIR/bin"
 curl -L "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp" -o "$LIB_DIR/bin/yt-dlp"
 chmod +x "$LIB_DIR/bin/yt-dlp"
