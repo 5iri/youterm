@@ -121,30 +121,7 @@ install_source() {
     print_success "Source code installed"
 }
 
-download_source() {
-    print_status "Downloading youterm source code..."
 
-    # Create temp directory
-    mkdir -p "$TEMP_DIR"
-    cd "$TEMP_DIR"
-
-    # Download and extract source
-    if command -v curl &> /dev/null; then
-        curl -L "https://github.com/${REPO}/archive/${BRANCH}.tar.gz" | tar xz --strip-components=1
-    elif command -v wget &> /dev/null; then
-        wget -O- "https://github.com/${REPO}/archive/${BRANCH}.tar.gz" | tar xz --strip-components=1
-    else
-        print_error "curl or wget required to download source code"
-        exit 1
-    fi
-
-    if [[ ! -d "stream_cli" ]]; then
-        print_error "Failed to download source code"
-        exit 1
-    fi
-
-    print_success "Source code downloaded"
-}
 
 create_directories() {
     print_status "Creating directories..."
