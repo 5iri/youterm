@@ -6,12 +6,9 @@
 set -e
 
 YOUTERM_VERSION="0.2.0"
-REPO="5iri/youterm"
-BRANCH="main"
 INSTALL_DIR="$HOME/.local/bin"
 LIB_DIR="$HOME/.local/lib/youterm"
 CONFIG_DIR="$HOME/.config/youterm"
-TEMP_DIR="/tmp/youterm-install-$$"
 
 # Colors for output
 RED='\033[0;31m'
@@ -86,43 +83,6 @@ install_dependencies() {
     print_success "Dependencies installed"
 }
 
-install_source() {
-    print_status "Installing youterm source code..."
-
-    # If stream_cli exists locally, use it
-    if [[ -d "stream_cli" ]]; then
-        print_status "Using local source code..."
-        cp -r stream_cli "$LIB_DIR/"
-    else
-        print_status "Downloading source code from GitHub..."
-
-        # Create temp directory
-        mkdir -p "$TEMP_DIR"
-
-        # Download and extract source
-        if command -v curl &> /dev/null; then
-            curl -L "https://github.com/${REPO}/archive/${BRANCH}.tar.gz" | tar xz -C "$TEMP_DIR" --strip-components=1
-        elif command -v wget &> /dev/null; then
-            wget -O- "https://github.com/${REPO}/archive/${BRANCH}.tar.gz" | tar xz -C "$TEMP_DIR" --strip-components=1
-        else
-            print_error "curl or wget required to download source code"
-            exit 1
-        fi
-
-        if [[ ! -d "$TEMP_DIR/stream_cli" ]]; then
-            print_error "Failed to download source code"
-            exit 1
-        fi
-
-        # Copy source to install location
-        cp -r "$TEMP_DIR/stream_cli" "$LIB_DIR/"
-    fi
-
-    print_success "Source code installed"
-}
-
-
-
 create_directories() {
     print_status "Creating directories..."
 
@@ -134,7 +94,10 @@ create_directories() {
 }
 
 install_youterm() {
-    print_status "Creating executables..."
+    print_status "Installing youterm..."
+
+    # Copy source files
+    cp -r stream_cli "$LIB_DIR/"
 
     # Create main executable
     cat > "$INSTALL_DIR/youterm" << 'EOF'
@@ -246,19 +209,15 @@ main() {
     echo "=============================================="
     echo ""
 
+
+
     check_requirements
     create_directories
     install_dependencies
-    install_source
     install_youterm
     update_path
     create_uninstaller
     show_usage
-
-    # Cleanup temp directory
-    if [[ -d "$TEMP_DIR" ]]; then
-        rm -rf "$TEMP_DIR"
-    fi
 
     echo ""
     print_success "youterm is ready to use!"
