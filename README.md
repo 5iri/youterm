@@ -57,30 +57,20 @@ The installer automatically handles Python dependencies:
 
 ## Installation
 
-### Quick Install (Recommended)
+### Install (One Command)
 
 ```bash
-# Download and install directly from GitHub
-curl -sSL https://raw.githubusercontent.com/5iri/youterm/main/quick-install.sh | bash
+# Download and run installer directly from GitHub
+curl -sSL https://raw.githubusercontent.com/5iri/youterm/main/install.sh | bash
 ```
 
 ### Manual Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/5iri/youterm.git
-cd youterm
-
-# Run the installer (no pip required)
+# Download installer and run locally
+curl -O https://raw.githubusercontent.com/5iri/youterm/main/install.sh
+chmod +x install.sh
 ./install.sh
-```
-
-### Standalone Version
-
-```bash
-# Download single file (no installation needed)
-curl -O https://raw.githubusercontent.com/5iri/youterm/main/youterm-standalone.py
-python3 youterm-standalone.py "your search query"
 ```
 
 ## Usage
@@ -189,16 +179,16 @@ Youterm automatically creates configuration files in `~/.config/youterm/`:
 
 ## Alternative Installation Methods
 
-### From PyPI (when available)
-```bash
-pip install youterm
-```
-
-### From Source with pip
+### From Source (Development)
 ```bash
 git clone https://github.com/5iri/youterm.git
 cd youterm
-pip install -e .
+./install.sh
+```
+
+### From PyPI (when available)
+```bash
+pip install youterm
 ```
 
 ## Troubleshooting
@@ -289,25 +279,18 @@ rm -rf ~/.config/youterm
 * **Smart Variety**: Balances familiarity with discovery
 * **Contextual Suggestions**: Considers current queue and recent plays
 
-## Packaging & Distribution
+## Development
 
-The project is PEP 517 compliant via `pyproject.toml`.
-
-Build wheels / sdist locally:
+For developers who want to build packages:
 
 ```bash
+git clone https://github.com/5iri/youterm.git
+cd youterm
 python -m pip install --upgrade build
 python -m build
 ls dist/
-# youterm-0.1.0-py3-none-any.whl
-# youterm-0.1.0.tar.gz
-```
-
-Upload to PyPI (requires `twine`):
-
-```bash
-python -m pip install twine
-python -m twine upload dist/*
+# youterm-0.2.0-py3-none-any.whl
+# youterm-0.2.0.tar.gz
 ```
 
 ## Roadmap
