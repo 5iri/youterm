@@ -1,0 +1,5 @@
+[console_scripts]
+stream-cli = stream_cli.cli:main
+stream-discover = stream_cli.discovery:main
+stream-play = stream_cli.cli:main
+stream-queue = stream_cli.smart_queue:main

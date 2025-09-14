@@ -1,0 +1,4 @@
+[console_scripts]
+youterm = stream_cli.cli:main
+youterm-discover = stream_cli.discovery:main
+youterm-queue = stream_cli.smart_queue:main
