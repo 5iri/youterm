@@ -5,7 +5,7 @@
 
 set -e
 
-YOUTERM_VERSION="0.1.0"
+YOUTERM_VERSION="0.2.0"
 INSTALL_DIR="$HOME/.local/bin"
 LIB_DIR="$HOME/.local/lib/youterm"
 CONFIG_DIR="$HOME/.config/youterm"
