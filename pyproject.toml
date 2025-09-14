@@ -5,23 +5,40 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "youterm"
 version = "0.1.0"
-description = "Terminal audio streaming CLI tool with Spotify-like discovery."
+description = "Terminal audio streaming with Spotify-like discovery for YouTube content."
 authors = [
-    {name = "Your Name", email = "you@example.com"}
+    {name = "Youterm Contributors", email = "contact@youterm.dev"}
 ]
 readme = "README.md"
 requires-python = ">=3.8"
-license = {text = "MIT"}
+license = "MIT"
+keywords = ["youtube", "music", "terminal", "cli", "streaming", "spotify", "audio"]
 dependencies = [
     "yt-dlp>=2023.9.24",
     "readchar>=4.0.3"
 ]
 classifiers = [
+    "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: End Users/Desktop",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Players",
+    "Topic :: Internet :: WWW/HTTP",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
 ]
+
+[project.urls]
+Homepage = "https://github.com/youterm/youterm"
+Repository = "https://github.com/youterm/youterm"
+Documentation = "https://github.com/youterm/youterm#readme"
+Issues = "https://github.com/youterm/youterm/issues"
 
 [project.scripts]
 youterm = "stream_cli.cli:main"

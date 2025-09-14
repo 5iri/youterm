@@ -1,0 +1,11 @@
+include README.md
+include LICENSE
+include pyproject.toml
+recursive-include stream_cli *.py
+exclude demo.py
+exclude demo_auto_discovery.py
+exclude test_*.py
+global-exclude __pycache__
+global-exclude *.py[co]
+global-exclude .DS_Store
+global-exclude *.egg-info

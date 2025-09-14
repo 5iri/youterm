@@ -47,21 +47,20 @@ Terminal audio streaming with Spotify-like discovery. Search YouTube from your t
 The package automatically installs Python deps:
 * `yt-dlp` (YouTube downloading)
 * `readchar` (keyboard input)
-* `textual` (enhanced TUI support)
 
 ## Installation
 
 ### From PyPI (recommended once released)
 
 ```bash
-pip install stream-cli            # system or --user
+pip install youterm            # system or --user
 ```
 
 ### From source (development)
 
 ```bash
-git clone https://github.com/youruser/stream-cli.git
-cd stream-cli
+git clone https://github.com/youruser/youterm.git
+cd youterm
 pip install -e .  # editable install for hacking
 ```
 
@@ -206,8 +205,8 @@ Build wheels / sdist locally:
 python -m pip install --upgrade build
 python -m build
 ls dist/
-# stream_cli-0.1.0-py3-none-any.whl
-# stream-cli-0.1.0.tar.gz
+# youterm-0.1.0-py3-none-any.whl
+# youterm-0.1.0.tar.gz
 ```
 
 Upload to PyPI (requires `twine`):
